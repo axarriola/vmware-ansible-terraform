@@ -1,0 +1,17 @@
+FROM centos:centos7
+
+ARG TERRAFORM_VERSION=0.12.26
+ARG VSPHERE_PLUGIN_VERSION=1.18.3
+ENV TF_DATA_DIR="/opt/.terraform"
+
+RUN yum install -y wget unzip && \
+    wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    mv terraform /usr/bin && \
+    rm -rf terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
+RUN wget https://releases.hashicorp.com/terraform-provider-vsphere/1.18.3/terraform-provider-vsphere_${VSPHERE_PLUGIN_VERSION}_linux_amd64.zip && \
+    unzip terraform-provider-vsphere_${VSPHERE_PLUGIN_VERSION}_linux_amd64.zip && \
+    mkdir -p ${TF_DATA_DIR}/plugins && \
+    mv terraform-provider-vsphere_v${VSPHERE_PLUGIN_VERSION}_x4 ${TF_DATA_DIR}/plugins && \
+    rm -rf terraform-provider-vsphere_${VSPHERE_PLUGIN_VERSION}_linux_amd64.zip

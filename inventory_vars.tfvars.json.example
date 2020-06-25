@@ -1,0 +1,12 @@
+{
+  "datastores": [
+    "datastore-01"
+  ], 
+  "templates": [
+    "vm-template1"
+  ], 
+  "networks": [
+    "VM Network2", 
+    "VM Network"
+  ]
+}

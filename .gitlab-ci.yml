@@ -1,0 +1,66 @@
+stages:
+  - inventory
+  - deploy
+  #- configure
+
+.aggregate_rules: &aggregate_rules
+  - if: '$CI_COMMIT_BRANCH == "master"'
+    when: on_success
+  - when: never
+
+variables: &cd_vars
+  REGISTRY: "localhost:5000"
+  ANSIBLE_REMOTE_USER: "admin"
+  ANSIBLE_STDOUT_CALLBACK: "yaml"
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  ANSIBLE_SSH_PIPELINING: "True"
+  VARS_JSON: "data/inventory_vars.tfvars.json"
+  INVENTORY_JSON: "data/inventory.tfvars.json"
+  TF_INPUT: 0
+  TF_LOG: "TRACE"
+  TF_IN_AUTOMATION: "1"
+  TF_DATA_DIR: "/opt/.terraform"
+  INVENTORY: "ansible_inventory.yml"
+  # MOVE THESE TO VAULT OR AS MASKED VARIABLES
+  VSPHERE_USER: "administrator@vsphere.local"
+  VSPHERE_PASSWORD: "adminpass123"
+
+prepare:
+  image: ${REGISTRY}/ansible/ansible2.7
+  stage: inventory
+  rules: *aggregate_rules
+  allow_failure: false
+  artifacts:
+    paths:
+      - "data/*.tfvars.json"
+  before_script:
+    - mkdir data/
+  script:
+    - ansible-inventory -i $INVENTORY --list > $INVENTORY_JSON
+    - python create_vars_json.py $INVENTORY_JSON
+
+#TODO: set artifactory backend
+terraform:
+  image: ${REGISTRY}/terraform/terraform:0.12.26
+  stage: deploy
+  rules: *aggregate_rules
+  dependencies:
+    - prepare
+  allow_failure: false
+  script:
+    - terraform init -plugin-dir="$TF_DATA_DIR/plugins"
+    - |
+      if [[ -n "$TAINT_GUEST" ]]; then
+        terraform taint 'vsphere_virtual_machine.vsphere_vms\"${TAINT_GUEST}\"]' -state="${INVENTORY}.tfstate"
+      fi
+    - terraform plan -var="vsphere_user=${VSPHERE_USER}" -var="vsphere_password=${VSPHERE_PASSWORD}" -var-file="$VARS_JSON" -var-file="$INVENTORY_JSON" -state="${INVENTORY}.tfstate" -out=tfplan
+    - terraform apply -state="${INVENTORY}.tfstate" tfplan
+
+## A following stage would be used to configure the VMs with ansible, using the original ansible inventory file
+#ansible:
+#  image: ${REGISTRY}/ansible/ansible2.7
+#  stage: configure
+#  rules: *aggregate_rules
+#  allow_failure: false
+#  script:
+#    - ansible-playbook -i ansible_inventory.yml configure.yml

@@ -1,0 +1,93 @@
+{
+    "_meta": {
+        "hostvars": {
+            "tf-test": {
+                "disk_layout": [
+                    {
+                        "datastore": "datastore-01",
+                        "size_gb": "150",
+                        "type": "thin"
+                    }
+                ],
+                "dns_servers": [
+                    "8.8.8.8",
+                    "8.8.4.4"
+                ],
+                "guest_id": "centos64Guest",
+                "guest_memory": 2048,
+                "guest_template": "vm-template1",
+                "guest_vcpu": 2,
+                "name": "tf-test",
+                "network_adapters": [
+                    {
+                        "gateway": "172.16.0.1",
+                        "gatewayv6": "fcf8:ab17:01fd::1",
+                        "ip": "172.16.0.170",
+                        "ipv6": "fcf8:ab17:01fd::170",
+                        "name": "VM Network",
+                        "netmask": "255.255.255.0",
+                        "netmaskv6": "64"
+                    },
+                    {
+                        "ip": "172.17.0.170",
+                        "ipv6": "fcf8:ab17:02fd::170",
+                        "name": "VM Network2",
+                        "netmask": "255.255.255.0",
+                        "netmaskv6": "64"
+                    }
+                ]
+            },
+            "tf-test2": {
+                "disk_layout": [
+                    {
+                        "datastore": "datastore-01",
+                        "size_gb": "150",
+                        "type": "thin"
+                    }
+                ],
+                "dns_servers": [
+                    "8.8.8.8",
+                    "8.8.4.4"
+                ],
+                "guest_id": "centos64Guest",
+                "guest_memory": 2048,
+                "guest_template": "vm-template1",
+                "guest_vcpu": 2,
+                "name": "tf-test2",
+                "network_adapters": [
+                    {
+                        "gateway": "172.16.0.1",
+                        "gatewayv6": "fcf8:ab17:01fd::1",
+                        "ip": "172.16.0.171",
+                        "ipv6": "fcf8:ab17:01fd::171",
+                        "name": "VM Network",
+                        "netmask": "255.255.255.0",
+                        "netmaskv6": "64",
+                        "start_connected": true
+                    },
+                    {
+                        "ip": "172.17.0.171",
+                        "ipv6": "fcf8:ab17:02fd::171",
+                        "name": "VM Network2",
+                        "netmask": "255.255.255.0",
+                        "netmaskv6": "64",
+                        "start_connected": true
+                    }
+                ]
+            }
+        }
+    },
+    "all": {
+        "children": [
+            "tf_group",
+            "ungrouped"
+        ]
+    },
+    "tf_group": {
+        "hosts": [
+            "tf-test",
+            "tf-test2"
+        ]
+    },
+    "ungrouped": {}
+}

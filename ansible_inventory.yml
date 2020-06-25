@@ -1,0 +1,52 @@
+all:
+  children:
+    tf_group:
+      hosts:
+        tf-test:
+          name: "tf-test"
+          network_adapters:
+          - name: "VM Network"
+            ip: "172.16.0.170"
+            netmask: '255.255.255.0'
+            gateway: "172.16.0.1"
+            ipv6: "fcf8:ab17:01fd::170"
+            netmaskv6: "64"
+            gatewayv6: "fcf8:ab17:01fd::1"
+          - name: "VM Network2"
+            ip: "172.17.0.170"
+            netmask: '255.255.255.0'
+            ipv6: "fcf8:ab17:02fd::170"
+            netmaskv6: "64"
+          disk_layout:
+          - size_gb: "150"
+            type: "thin"
+            datastore: "datastore-01"
+        tf-test2:
+          name: "tf-test2"
+          network_adapters:
+          - name: "VM Network"
+            ip: "172.16.0.171"
+            netmask: '255.255.255.0'
+            gateway: "172.16.0.1"
+            ipv6: "fcf8:ab17:01fd::171"
+            netmaskv6: "64"
+            gatewayv6: "fcf8:ab17:01fd::1"
+            start_connected: True
+          - name: "VM Network2"
+            ip: "172.17.0.171"
+            netmask: '255.255.255.0'
+            ipv6: "fcf8:ab17:02fd::171"
+            netmaskv6: "64"
+            start_connected: True
+          disk_layout:
+          - size_gb: "150"
+            type: "thin"
+            datastore: "datastore-01"
+      vars:
+        guest_id: centos64Guest
+        guest_memory: 2048
+        guest_vcpu: 2
+        dns_servers:
+          - 8.8.8.8
+          - 8.8.4.4
+        guest_template: vm-template1
