@@ -4,8 +4,7 @@ Deploy virtual machines to vsphere with Terraform using an ansible inventory.
 ## Use case
 Initially, the whole deployment and configuration lifecycle was managed by Ansible. Later on, a requirement to move the deployment part to Terraform came in (because it is specialized in IaC).
 All the configuration management playbooks and roles depended on ansible inventory/group variables, so the ansible inventory was required as a data source.
-In order to avoid having two separate host data sources (ansible inventory and terraform resources) with overlapping values, a couple stages were added to the pipeline,
-in order to use the same ansible inventory to deploy the Virtual Machines with Terraform.
+In order to avoid having two separate host data sources (ansible inventory and terraform resources) with overlapping values, a couple stages were added to the pipeline in order to use the same ansible inventory to deploy the Virtual Machines with Terraform.
 
 ## Dockerfile
 
@@ -14,6 +13,8 @@ The Dockerfile-terraform file can be used to build a container image with Terraf
 ARG TERRAFORM_VERSION=0.12.26
 ARG VSPHERE_PLUGIN_VERSION=1.18.3
 ```
+
+For the stages that use an ansible container, this repository can be used to create the corresponding image: https://github.com/axarriola/ansible-docker-image
 
 # Workflow
 
@@ -26,11 +27,10 @@ file. After the terraform deployment, ansible can be executed with the original 
 
 Prior to executing terraform, the necessary terraform variable files need to be created from the ansible inventory file.
 
-**Inputs:** ansible inventory (ansible_inventory.yml)
-**Outputs:** terraform variable files in json (inventory.tfvars.json and inventory_vars.tfvars.json)
-
-* inventory.tfvars.json is created by converting the ansible inventory from yaml to json using `ansible-inventory ansible_inventory.yml --list`.
-* inventory_vars.tfvars.json is created by executing `python create_vars_json.py ansible_inventory.yml` to extract the datastore names, portgroup names and VM template names that will need to be imported by terraform as data sources.
+* **Inputs:** ansible inventory (ansible_inventory.yml)
+* **Outputs:**
+  * inventory.tfvars.json is created by converting the ansible inventory from yaml to json using `ansible-inventory ansible_inventory.yml --list`.
+  * inventory_vars.tfvars.json is created by executing `python create_vars_json.py ansible_inventory.yml` to extract the datastore names, portgroup names and VM template names that will need to be imported by terraform as data sources.
 
 Examples of both output files were added in this repository as inventory.tfvars.json.example and inventory_vars.tfvars.json.example. Both can be safely deleted, as they are created dynamically (as explained above).
 
@@ -51,5 +51,5 @@ Apply the changes with `terraform apply -state="ansible_inventory.yml.tfstate" t
 In order to use this after the first deployment, you need to setup a backend for terraform to save/retrieve the state before/after each deployment.
 This is a personal choice and depends on what you have avaiable, in my case it was artifactory. You can search the possibilities here https://www.terraform.io/docs/backends/types/index.html.
 
-## ipv4 netmask
+## IPv4 Netmask
 If your ipv4 netmask in the ansible inventory is not in CIDR notation ((like in my case)[https://github.com/axarriola/vmware-ansible-terraform/blob/d4401d389c26e661790508d9012229c993b36401/vsphere_vms.tf#L52]), you would need to translate it. I didn't find a filter to do this in terraform, I might do one if I get the time.
